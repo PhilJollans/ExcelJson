@@ -12,5 +12,15 @@ namespace ExcelJson
     {
 
     }
+
+    private void ReadButton_Click(object sender, RibbonControlEventArgs e)
+    {
+
+    }
+
+    private void WriteButton_Click(object sender, RibbonControlEventArgs e)
+    {
+
+    }
   }
 }

@@ -34,23 +34,43 @@
     /// </summary>
     private void InitializeComponent()
     {
-      this.tab1 = Factory.CreateRibbonTab();
-      this.group1 = Factory.CreateRibbonGroup();
+      this.tab1 = this.Factory.CreateRibbonTab();
+      this.JsonGroup = this.Factory.CreateRibbonGroup();
+      this.ReadButton = this.Factory.CreateRibbonButton();
+      this.WriteButton = this.Factory.CreateRibbonButton();
       this.tab1.SuspendLayout();
-      this.group1.SuspendLayout();
+      this.JsonGroup.SuspendLayout();
       this.SuspendLayout();
       // 
       // tab1
       // 
-      this.tab1.Name = "tab1";
       this.tab1.ControlId.ControlIdType = Microsoft.Office.Tools.Ribbon.RibbonControlIdType.Office;
-      this.tab1.ControlId.OfficeId = "TabAddIns";
-      this.tab1.Groups.Add(this.group1);
+      this.tab1.Groups.Add(this.JsonGroup);
+      this.tab1.Label = "TabAddIns";
+      this.tab1.Name = "tab1";
       // 
-      // group1
+      // JsonGroup
       // 
-      this.group1.Label = "group1";
-      this.group1.Name = "group1";
+      this.JsonGroup.Items.Add(this.ReadButton);
+      this.JsonGroup.Items.Add(this.WriteButton);
+      this.JsonGroup.Label = "json";
+      this.JsonGroup.Name = "JsonGroup";
+      // 
+      // ReadButton
+      // 
+      this.ReadButton.Image = global::ExcelJson.Properties.Resources.json;
+      this.ReadButton.Label = "Read";
+      this.ReadButton.Name = "ReadButton";
+      this.ReadButton.ShowImage = true;
+      this.ReadButton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.ReadButton_Click);
+      // 
+      // WriteButton
+      // 
+      this.WriteButton.Image = global::ExcelJson.Properties.Resources.json;
+      this.WriteButton.Label = "Write";
+      this.WriteButton.Name = "WriteButton";
+      this.WriteButton.ShowImage = true;
+      this.WriteButton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.WriteButton_Click);
       // 
       // ExcelJsonRibbon
       // 
@@ -60,8 +80,8 @@
       this.Load += new Microsoft.Office.Tools.Ribbon.RibbonUIEventHandler(this.ExcelJsonRibbon_Load);
       this.tab1.ResumeLayout(false);
       this.tab1.PerformLayout();
-      this.group1.ResumeLayout(false);
-      this.group1.PerformLayout();
+      this.JsonGroup.ResumeLayout(false);
+      this.JsonGroup.PerformLayout();
       this.ResumeLayout(false);
 
     }
@@ -69,7 +89,9 @@
     #endregion
 
     internal Microsoft.Office.Tools.Ribbon.RibbonTab tab1;
-    internal Microsoft.Office.Tools.Ribbon.RibbonGroup group1;
+    internal Microsoft.Office.Tools.Ribbon.RibbonGroup JsonGroup;
+    internal Microsoft.Office.Tools.Ribbon.RibbonButton ReadButton;
+    internal Microsoft.Office.Tools.Ribbon.RibbonButton WriteButton;
   }
 
   partial class ThisRibbonCollection
