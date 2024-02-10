@@ -58,6 +58,7 @@
       // 
       // ReadButton
       // 
+      this.ReadButton.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
       this.ReadButton.Image = global::ExcelJson.Properties.Resources.json;
       this.ReadButton.Label = "Read Json Array";
       this.ReadButton.Name = "ReadButton";
@@ -66,6 +67,7 @@
       // 
       // WriteButton
       // 
+      this.WriteButton.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
       this.WriteButton.Image = global::ExcelJson.Properties.Resources.json;
       this.WriteButton.Label = "Write Json Array";
       this.WriteButton.Name = "WriteButton";
