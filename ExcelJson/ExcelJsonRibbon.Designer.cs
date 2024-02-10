@@ -59,7 +59,7 @@
       // ReadButton
       // 
       this.ReadButton.Image = global::ExcelJson.Properties.Resources.json;
-      this.ReadButton.Label = "Read";
+      this.ReadButton.Label = "Read Json Array";
       this.ReadButton.Name = "ReadButton";
       this.ReadButton.ShowImage = true;
       this.ReadButton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.ReadButton_Click);
@@ -67,7 +67,7 @@
       // WriteButton
       // 
       this.WriteButton.Image = global::ExcelJson.Properties.Resources.json;
-      this.WriteButton.Label = "Write";
+      this.WriteButton.Label = "Write Json Array";
       this.WriteButton.Name = "WriteButton";
       this.WriteButton.ShowImage = true;
       this.WriteButton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.WriteButton_Click);
@@ -77,7 +77,6 @@
       this.Name = "ExcelJsonRibbon";
       this.RibbonType = "Microsoft.Excel.Workbook";
       this.Tabs.Add(this.tab1);
-      this.Load += new Microsoft.Office.Tools.Ribbon.RibbonUIEventHandler(this.ExcelJsonRibbon_Load);
       this.tab1.ResumeLayout(false);
       this.tab1.PerformLayout();
       this.JsonGroup.ResumeLayout(false);
