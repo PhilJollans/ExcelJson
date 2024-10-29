@@ -104,9 +104,19 @@ namespace ExcelJson
             for ( int col = 0 ; col < propertyNames.Count ; col++ )
             {
               var propertyName = propertyNames[col];
+
               // Get the property value for the current property name
               JToken propertyValue = jsonObject[propertyName];
-              worksheet.Cells[row, col+1] = propertyValue ;
+
+              // Excel likes to detect a boolean value and convert it to a localized string.
+              if ( ( propertyValue?.ToString() == "true" ) || ( propertyValue?.ToString() == "false" ) )
+              {
+                worksheet.Cells[row, col+1] = "'" + propertyValue ;
+              }
+              else
+              {
+                worksheet.Cells[row, col+1] = propertyValue ;
+              }
             }
           }
 
