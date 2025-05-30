@@ -63,6 +63,16 @@ namespace ExcelJson.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap angular_black {
+            get {
+                object obj = ResourceManager.GetObject("angular-black", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap json {
             get {
                 object obj = ResourceManager.GetObject("json", resourceCulture);

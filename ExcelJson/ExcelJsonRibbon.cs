@@ -10,11 +10,20 @@ using Newtonsoft.Json;
 using System.Windows.Forms;
 using Newtonsoft.Json.Linq;
 using System.Security.Cryptography;
+using System.Xml.Linq;
 
 namespace ExcelJson
 {
   public partial class ExcelJsonRibbon
   {
+    private class LocalizationData
+    {
+      [JsonProperty ( "locale" )]
+      public string Locale { get; set; }
+
+      [JsonProperty ( "translations" )]
+      public Dictionary<string, string> Translations { get; set; }
+    }
 
     private void ReadButton_Click( object sender, RibbonControlEventArgs e )
     {
@@ -249,6 +258,185 @@ namespace ExcelJson
       ResSheet.Name = BaseName;
 
       return ResSheet;
+    }
+
+    private void ReadAngularI18nFiles_Click( object sender, RibbonControlEventArgs e )
+    {
+      try
+      {
+        var ofd = new OpenFileDialog
+        {
+          Title = "Select json file with the original texts, e.g. messages.json",
+          DefaultExt = "json",
+          Filter = "json files (*.json)|*.json|All Files (*.*)|*.*",
+          CheckFileExists = true,
+        } ;
+
+        var response = ofd.ShowDialog();
+        if ( response == DialogResult.OK )
+        {
+          // Get parts of the path
+          var fullPath = ofd.FileName ;
+          var directory = Path.GetDirectoryName(fullPath);
+          var basename = Path.GetFileNameWithoutExtension ( fullPath ) ;
+
+          // Create a new worksheet with the basename.
+          var worksheet = GetWorksheetForBaseName ( basename ) ;
+
+          // Read the file
+          string jsonString = File.ReadAllText ( fullPath );
+          var localizationData = JsonConvert.DeserializeObject<LocalizationData>(jsonString);
+
+          // Write the excel header line
+          worksheet.Cells[1, 1] = "key" ;
+          worksheet.Cells[1, 2] = localizationData.Locale;
+
+          // Get an ordererd list of the texts
+          var orderedList = localizationData.Translations.Keys.ToList();
+
+          // Now loop over the texts
+          for ( int i = 0 ; i < orderedList.Count() ; i++ )
+          {
+            int row = i + 2 ;
+            worksheet.Cells[row, 1] = orderedList[i] ;
+            worksheet.Cells[row, 2] = localizationData.Translations[orderedList[i]];
+          }
+
+          // Discover localized files
+          var files = Directory.GetFiles(directory, basename + ".*.json");
+
+          // Define the column for the next language
+          int col = 3 ;
+
+          foreach ( string file in files )
+          {
+            // Read the file
+            jsonString = File.ReadAllText ( file );
+            var localData = JsonConvert.DeserializeObject<LocalizationData>(jsonString);
+
+            // Write the header
+            worksheet.Cells[1, col] = localData.Locale;
+
+            foreach ( var kvp in localData.Translations )
+            {
+              int index = orderedList.FindIndex(key => key == kvp.Key);
+              if ( index >= 0 )
+              {
+                worksheet.Cells[index + 2, col].Value = kvp.Value;
+              }
+              // Consider adding lines for additional texts
+            }
+
+            // Advance to the next column
+            col++ ;
+          }
+        }
+      }
+      catch ( Exception ex )
+      {
+        MessageBox.Show ( $"Exception {ex.GetType ().ToString ()}, {ex.Message} in ExcelJson" );
+      }
+    }
+
+    private void WriteAngularI18nFiles_Click( object sender, RibbonControlEventArgs e )
+    {
+      try
+      {
+        var sfd = new SaveFileDialog
+        {
+          Title = "Select json file with the original texts, e.g. messages.json",
+          DefaultExt = "json",
+          Filter = "json files (*.json)|*.json|All Files (*.*)|*.*",
+          OverwritePrompt = false
+        } ;
+
+        var response = sfd.ShowDialog();
+        if ( response == DialogResult.OK )
+        {
+          // Get parts of the path
+          var fullPath = sfd.FileName ;
+          var directory = Path.GetDirectoryName(fullPath);
+          var basename = Path.GetFileNameWithoutExtension ( fullPath ) ;
+
+          // Get the active worksheet
+          Worksheet worksheet = Globals.ThisAddIn.Application.ActiveWorkbook.ActiveSheet ;
+
+          // Get the used range
+          var usedRange = worksheet.UsedRange ;
+
+          int nRows = usedRange.Rows.Count;
+          int nCols = usedRange.Columns.Count;
+
+          if ( !File.Exists ( fullPath ) )
+          {
+            // Tentative decision, only write the original texts if the file does not exist.
+
+            // Get the locale
+            string ietfTag = usedRange.Cells[1, 2].Text;
+            var textsDict = new Dictionary<string, string>() ;
+
+            // Iterate through rows (excluding the header)
+            for ( int row = 2 ; row <= nRows ; row++ )
+            {
+              var key = usedRange.Cells[row, 1].Text ;
+              if ( string.IsNullOrWhiteSpace ( key ) )
+              {
+                // This should not happen in a well formed excel table :)
+                break;
+              }
+              var text = usedRange.Cells[row, 2].Text ;
+              if ( !string.IsNullOrWhiteSpace ( text ) )
+              {
+                textsDict.Add ( key, text );
+              }
+            }
+
+            var localeData = new LocalizationData { Locale = ietfTag, Translations = textsDict } ;
+
+            string jsonString = JsonConvert.SerializeObject(localeData, Formatting.Indented);
+            File.WriteAllText ( fullPath, jsonString );
+          }
+
+          // Loop over the additional languages
+          // In this casee overwrite existing files.
+          for ( int col = 3 ;  col <= nCols ; col++ )
+          {
+            // Get the locale
+            string ietfTag = usedRange.Cells[1, col].Text;
+            var textsDict = new Dictionary<string, string>() ;
+
+            // To do: Move this loop to a subroutine :)
+
+            // Iterate through rows (excluding the header)
+            for ( int row = 2 ; row <= nRows ; row++ )
+            {
+              var key = usedRange.Cells[row, 1].Text ;
+              if ( string.IsNullOrWhiteSpace ( key ) )
+              {
+                // This should not happen in a well formed excel table :)
+                break ;
+              }
+              var text = usedRange.Cells[row, col].Text ;
+              if ( !string.IsNullOrWhiteSpace ( text ) )
+              {
+                textsDict.Add ( key, text );
+              }
+            }
+
+            var localeData = new LocalizationData { Locale = ietfTag, Translations = textsDict } ;
+            string jsonString = JsonConvert.SerializeObject(localeData, Formatting.Indented);
+
+            // Build the file name
+            var langFullPath = Path.Combine ( directory, $"{basename}.{ietfTag}.json" ) ;
+            File.WriteAllText ( langFullPath, jsonString );
+          }
+        }
+
+      }
+      catch ( Exception ex )
+      {
+        MessageBox.Show ( $"Exception {ex.GetType ().ToString ()}, {ex.Message} in ExcelJson" );
+      }
     }
   }
 }
