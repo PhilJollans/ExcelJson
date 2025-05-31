@@ -299,7 +299,9 @@ namespace ExcelJson
 
           // Write the excel header line
           worksheet.Cells[1, 1] = "key" ;
+          worksheet.Cells[1, 1].Interior.Color = System.Drawing.ColorTranslator.ToOle ( System.Drawing.Color.Gainsboro );
           worksheet.Cells[1, 2] = localizationData.Locale;
+          worksheet.Cells[1, 2].Interior.Color = System.Drawing.ColorTranslator.ToOle ( System.Drawing.Color.LemonChiffon );
 
           // Get an ordererd list of the texts
           var orderedList = localizationData.Translations.Keys.ToList();
@@ -326,6 +328,7 @@ namespace ExcelJson
 
             // Write the header
             worksheet.Cells[1, col] = localData.Locale;
+            worksheet.Cells[1, col].Interior.Color = System.Drawing.ColorTranslator.ToOle ( System.Drawing.Color.LemonChiffon );
 
             foreach ( var kvp in localData.Translations )
             {
@@ -335,6 +338,16 @@ namespace ExcelJson
                 worksheet.Cells[index + 2, col].Value = kvp.Value;
               }
               // Consider adding lines for additional texts
+            }
+
+            // Do a second loop to set the background colour of empty cells
+            for ( int i = 0 ; i < orderedList.Count () ; i++ )
+            {
+              int row = i + 2 ;
+              if ( !localData.Translations.ContainsKey(orderedList[i]) )
+              {
+                worksheet.Cells[row, col].Interior.Color = System.Drawing.ColorTranslator.ToOle ( System.Drawing.Color.MistyRose );
+              }
             }
 
             // Advance to the next column
