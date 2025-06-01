@@ -300,8 +300,10 @@ namespace ExcelJson
           // Write the excel header line
           worksheet.Cells[1, 1] = "key" ;
           worksheet.Cells[1, 1].Interior.Color = System.Drawing.ColorTranslator.ToOle ( System.Drawing.Color.Gainsboro );
+          worksheet.Columns[1].ColumnWidth = 30 ;
           worksheet.Cells[1, 2] = localizationData.Locale;
           worksheet.Cells[1, 2].Interior.Color = System.Drawing.ColorTranslator.ToOle ( System.Drawing.Color.LemonChiffon );
+          worksheet.Columns[2].ColumnWidth = 50;
 
           // Get an ordererd list of the texts
           var orderedList = localizationData.Translations.Keys.ToList();
@@ -317,11 +319,14 @@ namespace ExcelJson
           // Discover localized files
           var files = Directory.GetFiles(directory, basename + ".*.json");
 
-          // Define the column for the next language
-          int col = 3 ;
+          // Set col to the current last column
+          int col = 2 ;
 
           foreach ( string file in files )
           {
+            // Advance to the next column
+            col++;
+
             // Read the file
             jsonString = File.ReadAllText ( file );
             var localData = JsonConvert.DeserializeObject<LocalizationData>(jsonString);
@@ -329,6 +334,7 @@ namespace ExcelJson
             // Write the header
             worksheet.Cells[1, col] = localData.Locale;
             worksheet.Cells[1, col].Interior.Color = System.Drawing.ColorTranslator.ToOle ( System.Drawing.Color.LemonChiffon );
+            worksheet.Columns[col].ColumnWidth = 50;
 
             foreach ( var kvp in localData.Translations )
             {
@@ -349,10 +355,16 @@ namespace ExcelJson
                 worksheet.Cells[row, col].Interior.Color = System.Drawing.ColorTranslator.ToOle ( System.Drawing.Color.MistyRose );
               }
             }
-
-            // Advance to the next column
-            col++ ;
           }
+
+          // Set bottom border on the header row
+          Range headerRowRange = worksheet.Range[worksheet.Cells[1, 1], worksheet.Cells[1, col]];
+          headerRowRange.Borders[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
+          headerRowRange.Borders[XlBordersIndex.xlEdgeBottom].Weight = XlBorderWeight.xlMedium;
+          headerRowRange.Borders[XlBordersIndex.xlEdgeBottom].Color = System.Drawing.ColorTranslator.ToOle ( System.Drawing.Color.Black );
+
+          // And the font size
+          headerRowRange.Font.Size = 24;
         }
       }
       catch ( Exception ex )
