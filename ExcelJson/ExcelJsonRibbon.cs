@@ -251,6 +251,12 @@ namespace ExcelJson
 
     private Worksheet GetWorksheetForBaseName( string BaseName )
     {
+      // Limit the name to 31 characters
+      if ( BaseName.Length > 31 )
+      {
+        BaseName = BaseName.Substring ( 0, 31 );
+      }
+
       // Look for a worksheet with the basename of file
       Workbook Book = Globals.ThisAddIn.Application.ActiveWorkbook;
 
