@@ -117,9 +117,14 @@ namespace ExcelJson
               // Get the property value for the current property name
               JToken propertyValue = jsonObject[propertyName];
 
-              // Excel likes to detect a boolean value and convert it to a localized string.
-              if ( ( propertyValue?.ToString() == "true" ) || ( propertyValue?.ToString() == "false" ) )
+              if (propertyValue != null && propertyValue.Type == JTokenType.Boolean)
               {
+                // Actual boolean value, prevent localization in Excel
+                worksheet.Cells[row, col+1] = "'" + propertyValue;
+              }
+              else if ( ( propertyValue?.ToString() == "true" ) || ( propertyValue?.ToString() == "false" ) )
+              {
+                // Boolean as string, prevent localization in Excel
                 worksheet.Cells[row, col+1] = "'" + propertyValue ;
               }
               else
@@ -129,12 +134,15 @@ namespace ExcelJson
             }
           }
 
-          // Adjust the column sizes
-          worksheet.Columns.AutoFit() ;
-
           // Set the background colour for the header cells.
           Range headerRowRange = worksheet.Range[worksheet.Cells[1, 1], worksheet.Cells[1, propertyNames.Count]];
           headerRowRange.Interior.Color = XlRgbColor.rgbLightBlue;
+
+          // Rotate the text in the header row to vertical
+          headerRowRange.Orientation = 90; // 90 for vertical text (bottom to top). Use -90 for top to bottom.
+
+          // Adjust the column sizes
+          worksheet.Columns.AutoFit() ;
         }
       }
       catch ( Exception ex )
@@ -200,18 +208,20 @@ namespace ExcelJson
               {
                 if ( cellValue is string cellString )
                 {
-                  // Prefer true and false in lower case.
+                  // Prefer true and false as boolean values and not as string
                   if ( cellString.Equals ( "True", StringComparison.OrdinalIgnoreCase ) )
                   {
-                    cellString = "true" ;
+                    jsonObject[propertyName] = true ;
                   }
-                  if ( cellString.Equals ( "False", StringComparison.OrdinalIgnoreCase ) )
+                  else if ( cellString.Equals ( "False", StringComparison.OrdinalIgnoreCase ) )
                   {
-                    cellString = "false" ;
+                    jsonObject[propertyName] = false ;
                   }
-
-                  // Add the property to the JSON object
-                  jsonObject[propertyName] = JToken.FromObject ( cellString );
+                  else
+                  {
+                    // Add the property to the JSON object
+                    jsonObject[propertyName] = JToken.FromObject ( cellString );
+                  }
                 }
 #if false
                 else if ( cellValue is bool cellBool )
